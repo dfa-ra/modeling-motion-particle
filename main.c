@@ -1,40 +1,23 @@
+#include <float.h>
 #include <stdio.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdlib.h>
+#include <time.h>
+
+#include "includes/arr.h"
 #include "includes/vec.h"
+#include "includes/phisics.h"
+#include "includes/until.h"
 
-#define e 1.602e-19   // Заряд электрона (Кл)
-#define me 9.109e-31  // Масса электрона (кг)
 
-void runge_kutta_step(vec *r, vec *v, vec B, long double q, long double m, long double dt) {
-    vec k1_v, k2_v, k3_v, k4_v;
-    vec k1_r, k2_r, k3_r, k4_r;
-
-    vec a = vec_mul(vec_cross(*v, B), q / m);
-
-    k1_v = vec_mul(a, dt);
-    k1_r = vec_mul(*v, dt);
-
-    a = vec_mul(vec_cross(vec_sum(*v, vec_mul(k1_v, 0.5)), B), q / m);
-    k2_v = vec_mul(a, dt);
-    k2_r = vec_mul(vec_sum(*v, vec_mul(k1_v, 0.5)), dt);
-
-    a = vec_mul(vec_cross(vec_sum(*v, vec_mul(k2_v, 0.5)), B), q / m);
-    k3_v = vec_mul(a, dt);
-    k3_r = vec_mul(vec_sum(*v, vec_mul(k2_v, 0.5)), dt);
-
-    a = vec_mul(vec_cross(vec_sum(*v, k3_v), B), q / m);
-    k4_v = vec_mul(a, dt);
-    k4_r = vec_mul(vec_sum(*v, k3_v), dt);
-
-    *v = vec_sum(*v, vec_mul(vec_sum(vec_sum(k1_v, vec_mul(k2_v, 2.0)), vec_sum(vec_mul(k3_v, 2.0), k4_v)), 1.0 / 6.0));
-    *r = vec_sum(*r, vec_mul(vec_sum(vec_sum(k1_r, vec_mul(k2_r, 2.0)), vec_sum(vec_mul(k3_r, 2.0), k4_r)), 1.0 / 6.0));
-}
-
+void save_data_to_file(char* fname, vec* result, size_t size);
 
 
 // Основная программа
 int main() {
+
+    int flag = 1;
     // Исходные данные
     long double Ek = 5 * e;         // Кинетическая энергия (Дж)
     long double alpha = M_PI / 4;  // Угол вылета (радианы)
@@ -44,26 +27,49 @@ int main() {
         0
     };
     vec r = {0, 0, 0};             // Начальная позиция
-    vec B = {0, 0, 6};             // Магнитное поле
-    long double dt = 1e-13;        // Шаг времени (с)
+    vec B = (vec){0, 0, 0};            // Магнитное поле
+    vec E = (vec){0, 0, 0};
+
+    long double dt = 1e-14;        // Шаг времени (с)
     long double T = 1e-10;         // Общее время (с)
     size_t steps = T / dt;         // Количество шагов
+    size_t real_steps = 0;
+    vec result[steps];
 
-    // Открытие файла для записи
-    FILE* file = fopen("/media/ra/_work/ra/ITMO/PHISICS/projectC/drawer/data.txt", "w");
-    if (file == NULL) {
-        perror("Ошибка открытия файла");
-        return EXIT_FAILURE;
+
+    FILE* file = fopen("/media/ra/_work/ra/ITMO/PHISICS/projectC/sourse/data.txt", "r");
+
+    array_array_double phi_data = read_array_array_double_from_file(file);
+
+    if (phi_data.data == NULL ) {
+        return 1;
     }
 
     // Численный метод Эйлера
     for (size_t i = 0; i < steps; i++) {
-        runge_kutta_step(&r, &v, B, e, me, dt);
-        fprintf(file, "%.13Le %.13Le %.13Le\n", r.x, r.y, r.z);
+        if (i == 230 && flag == 1) {
+            flag = 0;
+            B = (vec){0, 0, 6};
+        }
+        else if (flag == 0) {
+            E = vec_mul(getE(&phi_data, r.y * 100), 100);
+        }
+
+        runge_kutta_step(&r, &v, B, E, e, me, dt);
+
+        result[i] = r;
+        real_steps++;
+        if (r.y <= 0) {
+            result[i] = r;
+            real_steps++;
+            flag = -1;
+            B = (vec){0, 0, 0};
+            E = (vec){0, 0, 0};
+            break;
+        };
     }
 
-
-    fclose(file);
-    printf("Траектория записана в файл trajectory.txt\n");
+    save_data_to_file("/media/ra/_work/ra/ITMO/PHISICS/projectC/drawer/data.txt", result, real_steps - 1);
+    free_array_array_double(phi_data);
     return 0;
 }

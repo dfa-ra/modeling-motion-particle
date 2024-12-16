@@ -9,14 +9,14 @@
 #include <stdlib.h>
 
 typedef struct {
-    double** data;
+    long double** data;
     size_t cols;
     size_t rows;
 } array_array_double;
 
 extern array_array_double none_array_array_double;
 
-array_array_double some_array_array_double(double ** data, size_t rows, size_t cols);
+array_array_double some_array_array_double(long double ** data, size_t rows, size_t cols);
 array_array_double malloc_array_array_double(size_t rows, size_t cols);
 array_array_double read_array_array_double_from_file(FILE* file);
 void print_array_array_double(array_array_double data);

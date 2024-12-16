@@ -5,8 +5,9 @@
 #ifndef PHISICS_H
 #define PHISICS_H
 
-const long double e_c = -1.6e-19;
-const long double me = 9.1e-31;
-const long double pi = 3.1415926535;
+
+#define e 1.602e-19   // Заряд электрона (Кл)
+#define me 9.109e-31  // Масса электрона (кг)
+
 
 #endif //PHISICS_H

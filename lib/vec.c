@@ -37,7 +37,7 @@ vec vec_div(const vec a, const long double k) {
 }
 
 void print_vec(const vec a) {
-    printf("%.61lf %.61lf %.61lf\n", a.x, a.y, a.z);
+    printf("%.10Lg %.10Lg %.10Lg\n", a.x, a.y, a.z);
 }
 
 long double vec_len(const vec a) {

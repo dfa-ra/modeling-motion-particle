@@ -5,15 +5,15 @@
 
 array_array_double none_array_array_double = {.data = NULL, .rows = 0, .cols = 0};
 
-array_array_double some_array_array_double(double ** data, size_t rows, size_t cols) {
+array_array_double some_array_array_double(long double ** data, size_t rows, size_t cols) {
     return (array_array_double){.data = data, .rows = rows, .cols = cols};
 }
 
 array_array_double malloc_array_array_double(size_t rows, size_t cols) {
-    double** data = malloc(sizeof(double*) * rows);
+    long double** data = malloc(sizeof(long double*) * rows);
 
     for (size_t i = 0; i < rows; i++) {
-        data[i] = malloc(sizeof(double) * cols);
+        data[i] = malloc(sizeof(long double) * cols);
     }
 
     return some_array_array_double(data, rows, cols);
@@ -43,7 +43,8 @@ array_array_double read_array_array_double_from_file(FILE* file) {
 
     for (size_t i = 0; i < rows; i++) {
         for (size_t j = 0; j < cols; j++) {
-            fscanf(file, "%lf", &data.data[i][j]);
+            fscanf(file, "%Lg", &data.data[i][j]);
+            // printf("%Lg\n", data.data[i][j]);
         }
     }
     fclose(file);

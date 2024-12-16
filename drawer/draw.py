@@ -5,7 +5,6 @@ print("start drawer")
 with open("/media/ra/_work/ra/ITMO/PHISICS/projectC/drawer/data.txt", "r") as file:
     coordinates = [tuple(map(float, line.split())) for line in file]
 
-print(coordinates)
 
 x_values = [coordinate[0] for coordinate in coordinates]
 y_values = [coordinate[1] for coordinate in coordinates]
